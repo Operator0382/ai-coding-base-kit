@@ -1,0 +1,65 @@
+version: 1
+name: feature-lifecycle
+description: Vendor-neutral lifecycle for product features.
+
+states:
+  - id: roadmap
+    owner: product
+    artifact: features/INDEX.md
+  - id: planned
+    owner: spec-writer
+    artifact: features/PROJ-X-*.md
+  - id: architected
+    owner: architect
+    artifact: features/PROJ-X-*.md
+  - id: in_progress
+    owner: frontend-or-backend
+    artifact: implementation
+  - id: in_review
+    owner: qa
+    artifact: qa-results
+  - id: approved
+    owner: qa
+    artifact: qa-results
+  - id: deployed
+    owner: devops
+    artifact: deployment-record
+
+transitions:
+  - from: roadmap
+    to: planned
+    role: spec-writer
+    approval: user
+  - from: planned
+    to: architected
+    role: architect
+    approval: user
+  - from: architected
+    to: in_progress
+    role: frontend-or-backend
+    approval: user
+  - from: in_progress
+    to: in_review
+    role: qa
+    approval: user
+  - from: in_review
+    to: approved
+    role: qa
+    condition: no-critical-or-high-bugs
+    approval: user
+  - from: approved
+    to: deployed
+    role: devops
+    condition: production-checklist-passed
+    approval: user
+
+parallel_work:
+  allowed:
+    - frontend and backend when file scopes do not overlap
+    - documentation and implementation when documentation does not describe unverified behavior
+  forbidden:
+    - two agents editing the same exclusive file at the same time
+    - deployment while QA is incomplete
+    - QA fixing implementation defects
+
+required_handoff: agent-system/contracts/handoff.md

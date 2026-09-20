@@ -1,5 +1,12 @@
 # General Project Rules
 
+## Agent-Neutral Contract
+
+This directory is a Claude Code adapter. Before applying these rules, read the
+canonical repository contract in `AGENTS.md` and the relevant files under
+`agent-system/`. If an adapter rule conflicts with the canonical contract, follow
+`AGENTS.md` and record the conflict in the handoff.
+
 ## New Project Detection (MANDATORY)
 Before starting ANY work, check if the project has been initialized:
 1. Read `docs/PRD.md` - if it still contains placeholder text like "_Describe what you are building_", the project is NOT initialized
@@ -73,3 +80,5 @@ After completing work on any feature, you MUST update tracking files. Follow thi
 - After completing a skill, suggest the next skill to the user
 - Format: "Next step: Run `/skillname` to [action]"
 - Handoffs are always user-initiated, never automatic
+- Also use the common format in `agent-system/contracts/handoff.md` so another
+  runtime can continue the work.

@@ -1,6 +1,10 @@
 # AI Coding Starter Kit
 
-> A Next.js template with an AI-powered development workflow using specialized skills for Requirements, Architecture, Frontend, Backend, QA, and Deployment.
+> A Next.js template with an agent-neutral development workflow for product, architecture, implementation, QA, and deployment.
+
+`AGENTS.md` and `agent-system/` are the canonical project contract for all coding
+agents. This file and `.claude/` provide the Claude Code adapter only; they must not
+override the agent-neutral rules.
 
 ## Tech Stack
 
@@ -38,6 +42,10 @@ docs/
 7. `/deploy` - Deploy to Vercel + production-ready checks
 
 Use `/refine PROJ-X` at any point to revisit and improve an existing feature spec.
+
+The lifecycle, role scopes, parallel-work rules, and handoff format are defined in
+`agent-system/`. Claude slash commands are one runtime-specific way to invoke the
+same workflow; other agents should load `AGENTS.md` and the relevant role file.
 
 ## Feature Tracking
 

@@ -1,0 +1,13 @@
+---
+description: Load the vendor-neutral project contract for every Cursor Agent task
+alwaysApply: true
+---
+
+Before working in this repository, read `AGENTS.md`, then read the relevant role file
+under `agent-system/roles/`. Follow the lifecycle in
+`agent-system/workflows/lifecycle.yaml`, the ownership rules in
+`agent-system/policies/ownership.md`, and the handoff format in
+`agent-system/contracts/handoff.md`.
+
+`agent-system/` is the canonical source of truth. Do not invent or override project
+rules based on Cursor-specific behavior.

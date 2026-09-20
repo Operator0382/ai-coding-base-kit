@@ -2,7 +2,10 @@
 
 > Build production-ready web apps faster with AI-powered Skills handling Requirements, Architecture, Development, QA, and Deployment.
 
-This template uses [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with modern Skills, Rules, and Sub-Agents to provide a complete AI-powered development workflow.
+This template provides an agent-neutral development workflow with roles, rules,
+handoffs, and feature tracking. It can be used with Codex, Gemini CLI, Cursor Agent,
+Claude Code, Hermes Agent, OpenClaw, or another coding agent that can read the shared
+repository contract.
 
 ## Quick Start
 
@@ -36,10 +39,11 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### 4. Initialize Your Project
 
-Open Claude Code and run `/init` with a brief description of your idea:
+Choose a coding agent and run the product initializer using its supported command
+mechanism. The shared workflow entry point is `init`:
 
 ```
-/init I want to build a project management tool for small teams
+init I want to build a project management tool for small teams
 where users can create projects, assign tasks, and track progress.
 ```
 
@@ -87,12 +91,16 @@ Each skill suggests the next step when it finishes. Handoffs are always user-ini
 | DevOps | `/deploy` | Deploys to Vercel with production-ready checks |
 | Help | `/help` | Context-aware guide: shows where you are and what to do next |
 
-### How Skills Work
+### How Workflows Work
 
-- **Skills** are defined in `.claude/skills/` and auto-discovered by Claude Code
-- **Rules** in `.claude/rules/` are auto-applied based on file context (no manual loading)
-- **Sub-Agents** run heavy tasks (frontend, backend, QA) in isolated contexts for cost efficiency
-- **CLAUDE.md** provides project context automatically at every session start
+- **The shared contract** is defined in `AGENTS.md` and `agent-system/`
+- **Roles** define responsibilities, file scopes, and expected outputs
+- **Workflows** define lifecycle states, approvals, and allowed parallel work
+- **Adapters** translate the shared contract into the conventions of each agent runtime
+- **`.claude/`** remains available as a Claude Code compatibility adapter
+
+The command column below shows the Claude-compatible slash syntax. Other agents use
+their own invocation mechanism but follow the same role and lifecycle names.
 
 ---
 
@@ -140,7 +148,11 @@ Every skill reads this file at start and updates it when done, preventing duplic
 
 ```
 ai-coding-starter-kit/
-+-- CLAUDE.md                        <-- Auto-loaded project context
++-- AGENTS.md                         <-- Shared contract for every coding agent
++-- GEMINI.md                         <-- Gemini CLI bootstrap adapter
++-- CLAUDE.md                         <-- Claude Code bootstrap adapter
++-- agent-system/                     <-- Agent-neutral roles, workflows, contracts
++-- .cursor/rules/                    <-- Cursor Agent bootstrap adapter
 +-- .claude/
 |   +-- settings.json                <-- Team permissions (committed)
 |   +-- settings.local.json          <-- Personal overrides (gitignored)
@@ -149,7 +161,7 @@ ai-coding-starter-kit/
 |   |   +-- frontend.md                  shadcn/ui, component standards
 |   |   +-- backend.md                   RLS, validation, queries
 |   |   +-- security.md                  Secrets, headers, auth
-|   +-- skills/                      <-- Invocable workflows (/command)
+|   +-- skills/                      <-- Claude-compatible workflow commands
 |   |   +-- init/SKILL.md                /init
 |   |   +-- write-spec/SKILL.md           /write-spec
 |   |   +-- refine/SKILL.md              /refine
@@ -216,8 +228,11 @@ See `docs/production/` for detailed setup guides.
 
 ## How It Works Under the Hood
 
-### Skills (`.claude/skills/`)
-Each skill is a structured workflow that Claude Code discovers automatically. Skills can run inline (in the main conversation) or as forked sub-agents (isolated context window).
+### Workflows (`agent-system/`)
+The vendor-neutral roles and lifecycle are defined in `agent-system/`. A runtime may
+execute them inline, in an isolated context, or through its own sub-agent mechanism.
+The existing `.claude/skills/` directory is a Claude-compatible adapter for the same
+workflow.
 
 | Skill | Execution | Why? |
 |-------|-----------|------|
@@ -231,14 +246,16 @@ Each skill is a structured workflow that Claude Code discovers automatically. Sk
 | `/deploy` | Inline | Deployment needs user oversight |
 | `/help` | Inline | Quick status check and guidance |
 
-### Rules (`.claude/rules/`)
-Coding standards that are auto-applied based on which files Claude is working with. No manual loading needed.
+### Rules (`AGENTS.md` and `agent-system/policies/`)
+Coding standards, file ownership, and parallel-work rules shared by every agent.
 
-### Sub-Agent Configs (`.claude/agents/`)
-Lightweight configurations that define model, tool access, and turn limits for forked skills.
+### Runtime Adapters
+Small runtime-specific bootstrap files tell an agent how to load the shared contract.
+They do not redefine roles, requirements, or security rules.
 
-### CLAUDE.md
-Auto-loaded at every session start. Contains tech stack, conventions, and references to PRD and feature index.
+### AGENTS.md
+The shared project contract. It contains the rules, lifecycle entry point, verification
+requirements, and references to the neutral role and policy files.
 
 ---
 
@@ -256,15 +273,19 @@ Not everything is loaded at once. Information is layered by relevance:
 
 | Layer | What | When loaded |
 |-------|------|-------------|
-| `CLAUDE.md` | Tech stack, conventions, commands | Every session (auto) |
-| `.claude/rules/` | Coding standards | When editing matching files (auto) |
-| Skill `SKILL.md` | Workflow instructions | When skill is invoked |
+| `AGENTS.md` | Shared contract and commands | Every agent session |
+| `agent-system/roles/` | Role responsibilities and scopes | When role is selected |
+| `agent-system/workflows/` | Lifecycle and transitions | When phase changes |
+| `agent-system/contracts/` | Handoffs and verification | At role completion |
+| Runtime adapter | Loading instructions for one agent | Per runtime |
 | Feature spec | Requirements, AC, tech design | On demand (skill reads it) |
 | `docs/production/` | Deployment guides | Only when referenced |
 
 ### Context is isolated
 
-Heavy implementation skills (`/frontend`, `/backend`, `/qa`) run as **forked sub-agents** with their own context window. Research noise from one skill doesn't pollute another. Each fork starts clean and loads only what it needs.
+Heavy implementation roles (`frontend`, `backend`, `qa`) may run as isolated agents or
+worktrees. The shared ownership policy defines when parallel work is safe and how
+handoffs are reported.
 
 ### Context recovery is built in
 
@@ -280,11 +301,11 @@ A global rule (`rules/general.md`) enforces: always read a file before modifying
 
 This template is designed as a starting point. Customize it for your team:
 
-1. **Edit CLAUDE.md** - Add your project-specific conventions and build commands
+1. **Edit AGENTS.md** - Add project-wide conventions shared by every agent
 2. **Edit docs/PRD.md** - Define your product vision and roadmap
-3. **Edit .claude/rules/** - Adjust coding standards for your team
-4. **Edit .claude/skills/** - Modify workflows to match your process
-5. **Edit .claude/settings.json** - Configure team permissions
+3. **Edit agent-system/roles/** - Adjust role responsibilities and file scopes
+4. **Edit agent-system/workflows/** - Modify lifecycle and handoff rules
+5. **Edit the runtime adapter** - Keep `.claude/`, `GEMINI.md`, or another adapter thin
 
 ---
 
