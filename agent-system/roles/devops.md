@@ -22,3 +22,5 @@ Prepare and verify a production deployment after QA approval.
 - verify environment variables are documented without exposing values;
 - confirm no critical or high QA findings remain;
 - require explicit approval before external deployment or remote push.
+- after verified deployment and the required user approval, update only the matching
+  feature row's status cell to `Deployed` and re-read that row.

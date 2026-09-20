@@ -1,0 +1,10 @@
+{
+  "name": "missing QA join gate",
+  "operations": [
+    {
+      "op": "delete",
+      "path": ["qa_join_gate"]
+    }
+  ],
+  "expectedError": "QA join gate must guard"
+}

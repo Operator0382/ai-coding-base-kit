@@ -9,7 +9,9 @@ It is intentionally independent of a model, vendor, CLI, editor, or tool protoco
 2. Read `agent-system/README.md` and the role file that matches the task.
 3. Read `features/INDEX.md` and the relevant feature specification.
 4. Inspect the current Git status and existing implementation before editing.
-5. Never read or modify secrets, credentials, certificates, or `.env` files.
+5. Never read or modify real secrets, credentials, certificates, or runtime `.env`
+   files. Explicit example files such as `.env.example` and `.env.local.example` are
+   safe documentation and may be read or edited with placeholder values only.
 
 ## Source of Truth
 
@@ -19,7 +21,8 @@ It is intentionally independent of a model, vendor, CLI, editor, or tool protoco
 - `agent-system/contracts/` contains handoff and verification formats.
 - `agent-system/policies/` contains ownership and parallel-work rules.
 - `features/INDEX.md` and feature specs contain product state.
-- `.claude/` is a Claude Code compatibility adapter, not the canonical source.
+- Runtime entry points (`CLAUDE.md`, `GEMINI.md`, `.cursor/`, `.claude/`, and
+  `agent-system/adapters/`) are compatibility adapters, not canonical sources.
 
 If an adapter-specific instruction conflicts with this contract, follow this file and
 report the conflict in the handoff.
@@ -37,6 +40,10 @@ report the conflict in the handoff.
   changes, external communication, or pushing to a remote.
 - Do not silently advance a workflow state. Record the evidence and request the
   required approval when the workflow says approval is needed.
+- `features/INDEX.md` is the single source of truth for lifecycle status. After the
+  required user approval, the role that completes a transition may update only the
+  status cell in the matching feature row, then must re-read that row. All other
+  index changes remain owned by the product role.
 
 ## Product Workflow
 
@@ -46,8 +53,11 @@ Use the lifecycle in `agent-system/workflows/lifecycle.yaml`:
 init -> spec -> architecture -> implementation -> qa -> deploy
 ```
 
-The implementation phase may be split between frontend and backend agents when their
-file scopes do not overlap. QA finds and documents defects; it does not fix them.
+Every feature specification declares its required implementation tracks and exactly
+one integration owner. Frontend and backend may work in parallel when their file
+scopes do not overlap. QA may start only when every required track has a completed
+handoff recorded in the specification, including the integration-owner track. QA
+finds and documents defects; it does not fix them.
 
 ## Verification
 
@@ -64,6 +74,8 @@ npm run lint
 npm test
 npm run test:e2e
 npm run test:all
+npm run check:contracts
+npm run test:contracts
 ```
 
 Run only the checks relevant to the change and state clearly when a check was not run.

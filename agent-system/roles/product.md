@@ -23,6 +23,7 @@ success criteria before implementation starts.
 - prioritized, single-purpose feature map;
 - backend and design-system decisions;
 - unresolved questions and explicit non-goals.
+- initial frontend/backend track expectations for each roadmap feature when known.
 
 ## Must Not Do
 

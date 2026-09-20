@@ -1,0 +1,11 @@
+{
+  "name": "unknown transition role",
+  "operations": [
+    {
+      "op": "set",
+      "path": ["transitions", 0, "role"],
+      "value": "mystery-role"
+    }
+  ],
+  "expectedError": "references unknown role"
+}

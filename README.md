@@ -50,7 +50,7 @@ where users can create projects, assign tasks, and track progress.
 The skill interviews you one question at a time (**Grill Me** principle — always with a recommended answer you just confirm or correct) until there's a shared understanding. It then:
 1. Creates your **Product Requirements Document** (`docs/PRD.md`)
 2. Breaks the project into a prioritized feature map (P0/P1/P2)
-3. Updates **feature tracking** (`features/INDEX.md`)
+3. Prepares **feature tracking** (`features/INDEX.md`) for the approved roadmap
 4. Recommends which feature to build first
 
 ### 5. Spec Your First Feature
@@ -67,8 +67,8 @@ The skill interviews you about this single feature in depth — user stories, ed
 
 ```
 /architecture    Design the tech approach for features/PROJ-1-user-auth.md
-/frontend        Build the UI for features/PROJ-1-user-auth.md
-/backend         Build the API for features/PROJ-1-user-auth.md
+/frontend        Complete the frontend track when required
+/backend         Complete the backend track when required
 /qa              Test features/PROJ-1-user-auth.md
 /deploy          Deploy to Vercel
 ```
@@ -111,8 +111,9 @@ their own invocation mechanism but follow the same role and lifecycle names.
 1. Spec      /write-spec      -->  Feature spec in features/PROJ-X.md
              /refine PROJ-X -->  Revisit and improve an existing spec
 2. Design    /architecture  -->  Tech design added to feature spec
-3. Build     /frontend      -->  UI components implemented
-             /backend       -->  APIs + database (if needed)
+3. Build     /frontend      -->  Frontend track (when required)
+             /backend       -->  Backend track (when required)
+             join gate      -->  All required handoffs + integration complete
 4. Test      /qa            -->  Test results added to feature spec
 5. Ship      /deploy        -->  Deployed to Vercel
 ```
@@ -126,7 +127,13 @@ Features are tracked in `features/INDEX.md`:
 | PROJ-1 | User Login | Deployed | [Spec](features/PROJ-1-user-login.md) |
 | PROJ-2 | Dashboard | In Progress | [Spec](features/PROJ-2-dashboard.md) |
 
-Every skill reads this file at start and updates it when done, preventing duplicate work.
+Every workflow reads this file at start. After a user-approved transition, the role
+that completed it may update only that feature row's status cell. Product owns all
+other index changes.
+
+Each feature spec declares whether frontend and backend are required, which required
+track owns integration, and where each completed implementation handoff is recorded.
+QA cannot begin until all required tracks and the integration-owner track are complete.
 
 ---
 
@@ -154,7 +161,7 @@ ai-coding-starter-kit/
 +-- agent-system/                     <-- Agent-neutral roles, workflows, contracts
 +-- .cursor/rules/                    <-- Cursor Agent bootstrap adapter
 +-- .claude/
-|   +-- settings.json                <-- Team permissions (committed)
+|   +-- settings.json                <-- Claude adapter permissions (committed)
 |   +-- settings.local.json          <-- Personal overrides (gitignored)
 |   +-- rules/                       <-- Auto-applied coding rules
 |   |   +-- general.md                   Git workflow, feature tracking
@@ -166,9 +173,9 @@ ai-coding-starter-kit/
 |   |   +-- write-spec/SKILL.md           /write-spec
 |   |   +-- refine/SKILL.md              /refine
 |   |   +-- architecture/SKILL.md        /architecture
-|   |   +-- frontend/SKILL.md            /frontend (runs as sub-agent)
-|   |   +-- backend/SKILL.md             /backend (runs as sub-agent)
-|   |   +-- qa/SKILL.md                  /qa (runs as sub-agent)
+|   |   +-- frontend/SKILL.md            /frontend wrapper
+|   |   +-- backend/SKILL.md             /backend wrapper
+|   |   +-- qa/SKILL.md                  /qa wrapper
 |   |   +-- deploy/SKILL.md              /deploy
 |   |   +-- help/SKILL.md                /help
 |   +-- agents/                      <-- Sub-agent configs
@@ -205,7 +212,9 @@ Run `/init` with a brief description of your idea. The skill interviews you one 
 
 ### 2. Spec Your First Feature
 
-Run `/write-spec PROJ-1`. The skill interviews you in depth about this single feature and creates a complete spec in `features/PROJ-1-name.md` — user stories, acceptance criteria, edge cases. Then suggest running `/architecture` as the next step.
+Run `/write-spec PROJ-1`. The skill interviews you in depth about this single feature
+and creates a complete spec in `features/PROJ-1-name.md` — user stories, acceptance
+criteria, edge cases, required implementation tracks, and integration ownership.
 
 ### 3. Add shadcn/ui Components (as needed)
 
@@ -240,9 +249,9 @@ workflow.
 | `/write-spec` | Inline | Needs live interview with user |
 | `/refine` | Inline | Needs live interview with user |
 | `/architecture` | Inline | Short output, user reviews in real-time |
-| `/frontend` | Sub-agent (forked) | Heavy file editing, lots of output |
-| `/backend` | Sub-agent (forked) | Heavy file editing, SQL, API code |
-| `/qa` | Sub-agent (forked) | Systematic testing, lots of output |
+| `/frontend` | Runtime-defined | Implements the declared frontend track |
+| `/backend` | Runtime-defined | Implements the declared backend track |
+| `/qa` | Runtime-defined | Enforces the join gate, then verifies the feature |
 | `/deploy` | Inline | Deployment needs user oversight |
 | `/help` | Inline | Quick status check and guidance |
 
@@ -283,9 +292,8 @@ Not everything is loaded at once. Information is layered by relevance:
 
 ### Context is isolated
 
-Heavy implementation roles (`frontend`, `backend`, `qa`) may run as isolated agents or
-worktrees. The shared ownership policy defines when parallel work is safe and how
-handoffs are reported.
+Heavy roles may run inline, as isolated agents, or in worktrees. Those are optional
+runtime capabilities; the shared ownership policy, handoffs, and gates are identical.
 
 ### Context recovery is built in
 
@@ -333,7 +341,16 @@ npm run lint         # ESLint
 npm test             # Vitest: integration tests for API routes
 npm run test:e2e     # Playwright: E2E tests for user flows
 npm run test:all     # Run both test suites
+npm run check:contracts # Validate the shared agent contract
+npm run test:contracts  # Run negative fixture checks for contract validation
 ```
+
+### Manual Agent Flow
+
+Agents without adapter conveniences follow the same minimal sequence: load the
+contract and selected role, check lifecycle state, work inside scope, verify, write a
+handoff, obtain the required user approval, then update only the matching status cell.
+See `agent-system/README.md` for the exact steps.
 
 ---
 

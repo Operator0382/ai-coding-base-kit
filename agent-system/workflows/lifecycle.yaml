@@ -1,6 +1,33 @@
-version: 1
+version: 2
 name: feature-lifecycle
 description: Vendor-neutral lifecycle for product features.
+
+roles:
+  - product
+  - spec-writer
+  - architect
+  - frontend
+  - backend
+  - qa
+  - devops
+
+contract_files:
+  - AGENTS.md
+  - agent-system/README.md
+  - agent-system/policies/ownership.md
+  - agent-system/policies/security.md
+  - agent-system/contracts/handoff.md
+  - agent-system/contracts/feature-spec-template.md
+  - agent-system/contracts/qa-results-template.md
+  - agent-system/roles/product.md
+  - agent-system/roles/spec-writer.md
+  - agent-system/roles/architect.md
+  - agent-system/roles/frontend.md
+  - agent-system/roles/backend.md
+  - agent-system/roles/qa.md
+  - agent-system/roles/devops.md
+  - features/INDEX.md
+  - features/README.md
 
 states:
   - id: roadmap
@@ -13,7 +40,7 @@ states:
     owner: architect
     artifact: features/PROJ-X-*.md
   - id: in_progress
-    owner: frontend-or-backend
+    owner: implementation
     artifact: implementation
   - id: in_review
     owner: qa
@@ -36,11 +63,15 @@ transitions:
     approval: user
   - from: architected
     to: in_progress
-    role: frontend-or-backend
+    roles:
+      - frontend
+      - backend
+    condition: required-implementation-tracks-declared
     approval: user
   - from: in_progress
     to: in_review
     role: qa
+    condition: required-implementation-tracks-complete
     approval: user
   - from: in_review
     to: approved
@@ -61,5 +92,34 @@ parallel_work:
     - two agents editing the same exclusive file at the same time
     - deployment while QA is incomplete
     - QA fixing implementation defects
+
+implementation_tracks:
+  allowed:
+    - frontend
+    - backend
+  declaration: Every feature specification lists each track as required or not-required.
+  integration_owner: Exactly one required track owns frontend/backend integration.
+  completion: A required track is complete only when its standard handoff is recorded in the feature specification.
+
+qa_join_gate:
+  transition:
+    from: in_progress
+    to: in_review
+  requires:
+    - feature-spec-declares-required-implementation-tracks
+    - every-required-track-status-is-complete
+    - every-required-track-handoff-is-recorded
+    - integration-owner-is-declared-and-complete
+
+status_updates:
+  file: features/INDEX.md
+  owner: product
+  exception_actor: transition-completing-role
+  exception_scope: matching-feature-row-status-cell-only
+  requires:
+    - transition-artifacts-complete
+    - transition-conditions-satisfied
+    - user-approval-recorded
+  verify: reread-matching-feature-row
 
 required_handoff: agent-system/contracts/handoff.md

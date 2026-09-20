@@ -1,6 +1,8 @@
 # Feature Specifications
 
-Dieser Ordner enthält detaillierte Feature Specs vom Requirements Engineer.
+Dieser Ordner enthält detaillierte Feature Specs der Spezifikationsrolle.
+Die kanonische Vorlage liegt in
+`agent-system/contracts/feature-spec-template.md`.
 
 ## Naming Convention
 `PROJ-X-feature-name.md`
@@ -26,7 +28,28 @@ Konkrete, testbare Kriterien:
 - [ ] Nach Registration wird User automatisch eingeloggt
 ```
 
-### 3. Edge Cases
+### 3. Implementation Tracks
+
+Jede Spec muss Frontend und Backend explizit als `required` oder `not-required`
+deklarieren. Genau ein benötigter Track besitzt die Frontend-/Backend-Integration.
+Ein benötigter Track wird erst `complete`, wenn sein Handoff nach
+`agent-system/contracts/handoff.md` in der Spec referenziert ist.
+
+```markdown
+## Implementation Tracks
+
+**Integration owner:** frontend
+
+| Track | Requirement | Status | Handoff |
+|---|---|---|---|
+| frontend | required | pending | — |
+| backend | required | pending | — |
+```
+
+QA darf erst beginnen, wenn alle `required` Tracks `complete` sind, jeder Handoff
+eingetragen ist und der Integration-Owner ebenfalls `complete` ist.
+
+### 4. Edge Cases
 Was passiert bei unerwarteten Situationen:
 ```markdown
 - Was passiert bei doppelter Email?
@@ -34,10 +57,11 @@ Was passiert bei unerwarteten Situationen:
 - Was passiert bei gleichzeitigen Edits?
 ```
 
-### 4. Tech Design (vom Solution Architect)
+### 5. Tech Design (vom Solution Architect)
 ```markdown
 ## Database Schema
-CREATE TABLE tasks (...);
+- Task: ID, title, status, owner, timestamps
+- Relationship: each task belongs to one project
 
 ## Component Architecture
 ProjectDashboard
@@ -45,7 +69,7 @@ ProjectDashboard
 │   └── ProjectCard
 ```
 
-### 5. QA Test Results (vom QA Engineer)
+### 6. QA Test Results (vom QA Engineer)
 Am Ende des Feature-Dokuments fügt QA die Test-Ergebnisse hinzu:
 ```markdown
 ---
@@ -68,7 +92,7 @@ Am Ende des Feature-Dokuments fügt QA die Test-Ergebnisse hinzu:
 - **Actual:** Silent failure
 ```
 
-### 6. Deployment Status (vom DevOps Engineer)
+### 7. Deployment Status (vom DevOps Engineer)
 ```markdown
 ---
 
@@ -82,29 +106,21 @@ Am Ende des Feature-Dokuments fügt QA die Test-Ergebnisse hinzu:
 
 ## Workflow
 
-1. **Requirements Engineer** erstellt Feature Spec
+1. **Spezifikationsrolle** erstellt die Feature Spec
 2. **User** reviewed Spec und gibt Feedback
 3. **Solution Architect** fügt Tech-Design hinzu
 4. **User** approved finales Design
-5. **Frontend/Backend Devs** implementieren (dokumentiert via Git Commits)
-6. **QA Engineer** testet und fügt Test-Ergebnisse zum Feature-Dokument hinzu
+5. **Frontend/Backend Devs** implementieren die als benötigt markierten Tracks und
+   tragen abgeschlossene Handoffs ein; der deklarierte Track verantwortet Integration
+6. **QA Engineer** prüft zuerst das Join-Gate und testet danach
 7. **DevOps** deployed und fügt Deployment-Status zum Feature-Dokument hinzu
 
 ## Status-Tracking
 
-Feature-Status wird direkt im Feature-Dokument getrackt:
-```markdown
-# PROJ-1: Feature Name
-
-**Status:** 🔵 Planned | 🟡 In Progress | ✅ Deployed
-**Created:** 2026-01-12
-**Last Updated:** 2026-01-12
-```
-
-**Status-Bedeutung:**
-- 🔵 Planned – Requirements sind geschrieben, ready for development
-- 🟡 In Progress – Wird gerade gebaut
-- ✅ Deployed – Live in Production
+Der Lifecycle-Status wird ausschließlich in `features/INDEX.md` getrackt. Nach einer
+freigegebenen Transition darf die abschließende Rolle nur die Statuszelle der
+betroffenen Feature-Zeile ändern und muss die Zeile anschließend erneut lesen.
+Andere Änderungen am Index gehören der Product-Rolle.
 
 **Git als Single Source of Truth:**
 - Alle Implementierungs-Details sind in Git Commits

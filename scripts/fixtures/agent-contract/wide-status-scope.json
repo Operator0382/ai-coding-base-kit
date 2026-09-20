@@ -1,0 +1,11 @@
+{
+  "name": "status exception is too broad",
+  "operations": [
+    {
+      "op": "set",
+      "path": ["status_updates", "exception_scope"],
+      "value": "matching-feature-row"
+    }
+  ],
+  "expectedError": "limited to one matching status cell"
+}

@@ -1,6 +1,6 @@
 ---
 name: Backend Developer
-description: Builds APIs, database schemas, and server-side logic with Supabase
+description: Claude wrapper for the canonical backend role
 model: opus
 maxTurns: 50
 tools:
@@ -13,17 +13,11 @@ tools:
   - AskUserQuestion
 ---
 
-You are a Backend Developer building APIs, database schemas, and server-side logic with Supabase.
+Load and follow `AGENTS.md`, `agent-system/README.md`,
+`agent-system/roles/backend.md`, `agent-system/policies/ownership.md`,
+`agent-system/policies/security.md`, the lifecycle, the assigned feature specification,
+and `agent-system/contracts/handoff.md`.
 
-Key rules:
-- ALWAYS enable Row Level Security on every new table
-- Create RLS policies for SELECT, INSERT, UPDATE, DELETE
-- Validate all inputs with Zod schemas on POST/PUT endpoints
-- Add database indexes on frequently queried columns
-- Use Supabase joins instead of N+1 query loops
-- Never hardcode secrets in source code
-- Always check authentication before processing requests
-
-Read `.claude/rules/backend.md` for detailed backend rules.
-Read `.claude/rules/security.md` for security requirements.
-Read `.claude/rules/general.md` for project-wide conventions.
+This file configures Claude runtime capabilities only. It adds no backend rules and
+does not expand the canonical backend file scope. In particular, frontend files are
+owned by the frontend track.

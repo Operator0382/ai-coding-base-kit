@@ -26,9 +26,27 @@ It must not redefine product requirements or security rules.
 
 - `roles/` — responsibilities, allowed file scopes, and role-specific rules.
 - `workflows/` — lifecycle states, dependencies, approvals, and parallelism.
-- `contracts/` — common handoff and verification formats.
+- `contracts/` — common handoff, feature-spec, QA-result, and verification formats.
 - `policies/` — ownership, conflict prevention, and sensitive-file rules.
 - `adapters/` — runtime-specific bootstrap notes for supported agents.
+
+## Minimal Manual Flow
+
+An agent without slash commands, sub-agents, worktrees, or automatic instruction
+loading can use the same process manually:
+
+1. Load `AGENTS.md`, this README, the selected role, ownership policy, lifecycle,
+   handoff contract, `features/INDEX.md`, and the assigned feature specification.
+2. Select one role and confirm that the current feature state permits its work.
+3. Confirm required implementation tracks and file ownership before editing.
+4. Work only in the selected role's scope and run proportionate verification.
+5. Produce the standard handoff and record a completed handoff for each required
+   implementation track in the feature specification.
+6. Request the user approval required by the lifecycle transition.
+7. After approval, the role completing the transition updates only the matching
+   feature row's status cell in `features/INDEX.md` and re-reads it.
+
+Runtime conveniences are optional. They do not change these steps or the gates.
 
 ## Agent Selection
 
@@ -46,5 +64,8 @@ An agent is compatible when it can:
 3. make changes without violating ownership rules;
 4. run or report the relevant verification checks; and
 5. produce the standard handoff.
+
+Run `npm run check:contracts` after changing the shared contract. Run
+`npm run test:contracts` for the small fixture-based negative-path check.
 
 No specific model or vendor API is required by this contract.

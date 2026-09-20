@@ -25,5 +25,9 @@ Every adapter must instruct the agent to:
 1. load `AGENTS.md` first;
 2. load the selected role from `agent-system/roles/`;
 3. respect `agent-system/policies/ownership.md`;
-4. follow `agent-system/workflows/lifecycle.yaml`;
-5. use `agent-system/contracts/handoff.md` when work ends.
+4. respect `agent-system/policies/security.md`;
+5. follow `agent-system/workflows/lifecycle.yaml`;
+6. use `agent-system/contracts/handoff.md` when work ends.
+
+Slash commands, sub-agents, worktrees, and automatic file loading are optional
+runtime conveniences. Adapters must not make them prerequisites for the workflow.
