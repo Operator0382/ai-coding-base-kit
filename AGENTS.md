@@ -21,8 +21,9 @@ It is intentionally independent of a model, vendor, CLI, editor, or tool protoco
 - `agent-system/contracts/` contains handoff and verification formats.
 - `agent-system/policies/` contains ownership and parallel-work rules.
 - `features/INDEX.md` and feature specs contain product state.
-- Runtime entry points (`CLAUDE.md`, `GEMINI.md`, `.cursor/`, `.claude/`, and
-  `agent-system/adapters/`) are compatibility adapters, not canonical sources.
+- Runtime entry points (`CLAUDE.md`, `GEMINI.md`, `.cursor/`, `.claude/`,
+  `.agents/skills/`, and `agent-system/adapters/`) are compatibility adapters, not
+  canonical sources.
 
 If an adapter-specific instruction conflicts with this contract, follow this file and
 report the conflict in the handoff.

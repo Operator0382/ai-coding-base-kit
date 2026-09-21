@@ -40,10 +40,11 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ### 4. Initialize Your Project
 
 Choose a coding agent and run the product initializer using its supported command
-mechanism. The shared workflow entry point is `init`:
+mechanism. Codex discovers the project skills in `.agents/skills/` and can invoke the
+entry point as `$init`; Claude Code keeps the existing `/init` wrapper:
 
 ```
-init I want to build a project management tool for small teams
+$init I want to build a project management tool for small teams
 where users can create projects, assign tasks, and track progress.
 ```
 
@@ -55,22 +56,25 @@ The skill interviews you one question at a time (**Grill Me** principle — alwa
 
 ### 5. Spec Your First Feature
 
-After initialization, create a detailed spec for the first feature:
+After initialization, create a detailed spec for the first feature. The examples below
+use Codex skill syntax; Claude Code uses the existing slash-command names:
 
 ```
-/write-spec PROJ-1
+$write-spec PROJ-1
 ```
 
-The skill interviews you about this single feature in depth — user stories, edge cases, acceptance criteria. Use `/refine PROJ-X` at any point to revisit and improve an existing spec.
+The skill interviews you about this single feature in depth — user stories, edge cases,
+acceptance criteria. Use `$refine PROJ-X` at any point to revisit and improve an
+existing spec.
 
 ### 6. Build Features
 
 ```
-/architecture    Design the tech approach for features/PROJ-1-user-auth.md
-/frontend        Complete the frontend track when required
-/backend         Complete the backend track when required
-/qa              Test features/PROJ-1-user-auth.md
-/deploy          Deploy to Vercel
+$architecture    Design the tech approach for features/PROJ-1-user-auth.md
+$frontend        Complete the frontend track when required
+$backend         Complete the backend track when required
+$qa              Test features/PROJ-1-user-auth.md
+$deploy          Deploy to Vercel
 ```
 
 Each skill suggests the next step when it finishes. Handoffs are always user-initiated.
@@ -79,17 +83,17 @@ Each skill suggests the next step when it finishes. Handoffs are always user-ini
 
 ## Available Skills
 
-| Skill | Command | What It Does |
-|-------|---------|-------------|
-| Project Initializer | `/init` | One-time setup: creates PRD + feature map via Grill Me interview |
-| Feature Spec Writer | `/write-spec` | Creates a full spec for one feature (user stories, AC, edge cases) |
-| Spec Refiner | `/refine PROJ-X` | Reopens an existing spec to improve, extend, or challenge it |
-| Solution Architect | `/architecture` | Designs PM-friendly tech architecture (no code, only high-level design) |
-| Frontend Developer | `/frontend` | Builds UI with React, Tailwind CSS, and shadcn/ui |
-| Backend Developer | `/backend` | Builds APIs, database schemas, RLS policies with Supabase |
-| QA Engineer | `/qa` | Tests features against acceptance criteria + security audit |
-| DevOps | `/deploy` | Deploys to Vercel with production-ready checks |
-| Help | `/help` | Context-aware guide: shows where you are and what to do next |
+| Skill | Codex | Claude Code | What It Does |
+|-------|-------|-------------|-------------|
+| Project Initializer | `$init` | `/init` | One-time setup: creates PRD + feature map via Grill Me interview |
+| Feature Spec Writer | `$write-spec` | `/write-spec` | Creates a full spec for one feature (user stories, AC, edge cases) |
+| Spec Refiner | `$refine PROJ-X` | `/refine PROJ-X` | Reopens an existing spec to improve, extend, or challenge it |
+| Solution Architect | `$architecture` | `/architecture` | Designs PM-friendly tech architecture (no code, only high-level design) |
+| Frontend Developer | `$frontend` | `/frontend` | Builds UI with React, Tailwind CSS, and shadcn/ui |
+| Backend Developer | `$backend` | `/backend` | Builds APIs, database schemas, RLS policies with Supabase |
+| QA Engineer | `$qa` | `/qa` | Tests features against acceptance criteria + security audit |
+| DevOps | `$deploy` | `/deploy` | Deploys to Vercel with production-ready checks |
+| Help | `$help` | `/help` | Context-aware guide: shows where you are and what to do next |
 
 ### How Workflows Work
 
@@ -97,25 +101,27 @@ Each skill suggests the next step when it finishes. Handoffs are always user-ini
 - **Roles** define responsibilities, file scopes, and expected outputs
 - **Workflows** define lifecycle states, approvals, and allowed parallel work
 - **Adapters** translate the shared contract into the conventions of each agent runtime
+- **`.agents/skills/`** provides Codex-discoverable project entry points
 - **`.claude/`** remains available as a Claude Code compatibility adapter
 
-The command column below shows the Claude-compatible slash syntax. Other agents use
-their own invocation mechanism but follow the same role and lifecycle names.
+Only the Codex and Claude Code invocation forms above are configured in this
+repository. Other agents may still follow the manual shared contract, but automatic
+discovery is runtime-specific and is not asserted here.
 
 ---
 
 ## Development Workflow
 
 ```
-0. Setup     /init          -->  PRD + feature map (once per project)
-1. Spec      /write-spec      -->  Feature spec in features/PROJ-X.md
-             /refine PROJ-X -->  Revisit and improve an existing spec
-2. Design    /architecture  -->  Tech design added to feature spec
-3. Build     /frontend      -->  Frontend track (when required)
-             /backend       -->  Backend track (when required)
+0. Setup     init           -->  PRD + feature map (once per project)
+1. Spec      write-spec     -->  Feature spec in features/PROJ-X.md
+             refine PROJ-X  -->  Revisit and improve an existing spec
+2. Design    architecture   -->  Tech design added to feature spec
+3. Build     frontend       -->  Frontend track (when required)
+             backend        -->  Backend track (when required)
              join gate      -->  All required handoffs + integration complete
-4. Test      /qa            -->  Test results added to feature spec
-5. Ship      /deploy        -->  Deployed to Vercel
+4. Test      qa             -->  Test results added to feature spec
+5. Ship      deploy         -->  Deployed to Vercel
 ```
 
 ### Feature Tracking
@@ -159,6 +165,7 @@ ai-coding-starter-kit/
 +-- GEMINI.md                         <-- Gemini CLI bootstrap adapter
 +-- CLAUDE.md                         <-- Claude Code bootstrap adapter
 +-- agent-system/                     <-- Agent-neutral roles, workflows, contracts
++-- .agents/skills/                   <-- Codex project workflow entry points
 +-- .cursor/rules/                    <-- Cursor Agent bootstrap adapter
 +-- .claude/
 |   +-- settings.json                <-- Claude adapter permissions (committed)
@@ -240,20 +247,21 @@ See `docs/production/` for detailed setup guides.
 ### Workflows (`agent-system/`)
 The vendor-neutral roles and lifecycle are defined in `agent-system/`. A runtime may
 execute them inline, in an isolated context, or through its own sub-agent mechanism.
-The existing `.claude/skills/` directory is a Claude-compatible adapter for the same
-workflow.
+The `.agents/skills/` directory contains Codex project skills, while
+`.claude/skills/` remains the Claude Code adapter for the same workflow. Both are thin
+entry points to the canonical files in `agent-system/`.
 
-| Skill | Execution | Why? |
+| Entry | Execution | Why? |
 |-------|-----------|------|
-| `/init` | Inline | Needs live interview with user |
-| `/write-spec` | Inline | Needs live interview with user |
-| `/refine` | Inline | Needs live interview with user |
-| `/architecture` | Inline | Short output, user reviews in real-time |
-| `/frontend` | Runtime-defined | Implements the declared frontend track |
-| `/backend` | Runtime-defined | Implements the declared backend track |
-| `/qa` | Runtime-defined | Enforces the join gate, then verifies the feature |
-| `/deploy` | Inline | Deployment needs user oversight |
-| `/help` | Inline | Quick status check and guidance |
+| `init` | Inline | Needs live interview with user |
+| `write-spec` | Inline | Needs live interview with user |
+| `refine` | Inline | Needs live interview with user |
+| `architecture` | Inline | Short output, user reviews in real-time |
+| `frontend` | Runtime-defined | Implements the declared frontend track |
+| `backend` | Runtime-defined | Implements the declared backend track |
+| `qa` | Runtime-defined | Enforces the join gate, then verifies the feature |
+| `deploy` | Inline | Deployment needs user oversight |
+| `help` | Inline | Quick status check and guidance |
 
 ### Rules (`AGENTS.md` and `agent-system/policies/`)
 Coding standards, file ownership, and parallel-work rules shared by every agent.

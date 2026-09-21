@@ -7,7 +7,7 @@ are deliberately thin: the canonical rules remain in `AGENTS.md` and `agent-syst
 
 | Agent | Repository entry point |
 |---|---|
-| Codex | `AGENTS.md` |
+| Codex | `AGENTS.md` and optional `.agents/skills/` entry points |
 | Gemini CLI | `GEMINI.md` |
 | Cursor Agent | `.cursor/rules/agent-system.mdc` |
 | Claude Code | `CLAUDE.md` and `.claude/` |

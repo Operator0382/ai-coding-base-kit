@@ -11,7 +11,7 @@ The project has one shared contract and thin runtime adapters:
 ```text
 AGENTS.md + agent-system/
         |
-        +-- Codex (AGENTS.md)
+        +-- Codex (AGENTS.md + .agents/skills/)
         +-- Gemini CLI (GEMINI.md)
         +-- Cursor Agent (.cursor/rules/)
         +-- Claude Code (.claude/)
@@ -29,6 +29,9 @@ It must not redefine product requirements or security rules.
 - `contracts/` — common handoff, feature-spec, QA-result, and verification formats.
 - `policies/` — ownership, conflict prevention, and sensitive-file rules.
 - `adapters/` — runtime-specific bootstrap notes for supported agents.
+
+Codex can discover the optional project skills in `.agents/skills/`. They are thin
+entry points to this shared layer and do not replace the manual flow below.
 
 ## Minimal Manual Flow
 

@@ -37,6 +37,46 @@ const requiredAdapterFiles = [
   "agent-system/adapters/openclaw.md",
 ]
 
+const requiredCodexSkills = {
+  init: ["agent-system/roles/product.md"],
+  "write-spec": [
+    "agent-system/roles/spec-writer.md",
+    "agent-system/contracts/feature-spec-template.md",
+  ],
+  architecture: ["agent-system/roles/architect.md"],
+  frontend: [
+    "agent-system/roles/frontend.md",
+    "agent-system/policies/ownership.md",
+    "agent-system/policies/security.md",
+  ],
+  backend: [
+    "agent-system/roles/backend.md",
+    "agent-system/policies/ownership.md",
+    "agent-system/policies/security.md",
+  ],
+  qa: [
+    "agent-system/roles/qa.md",
+    "agent-system/contracts/qa-results-template.md",
+  ],
+  deploy: [
+    "agent-system/roles/devops.md",
+    "agent-system/policies/security.md",
+  ],
+  help: ["features/INDEX.md"],
+  refine: [
+    "agent-system/roles/spec-writer.md",
+    "agent-system/roles/architect.md",
+    "agent-system/contracts/feature-spec-template.md",
+  ],
+}
+
+const sharedCodexSkillReferences = [
+  "AGENTS.md",
+  "agent-system/README.md",
+  "agent-system/workflows/lifecycle.yaml",
+  "agent-system/contracts/handoff.md",
+]
+
 function read(relativePath) {
   return fs.readFileSync(path.join(projectRoot, relativePath), "utf8")
 }
@@ -146,6 +186,29 @@ function addError(errors, condition, message) {
   if (!condition) errors.push(message)
 }
 
+function validateCodexSkills(errors) {
+  for (const [name, specificReferences] of Object.entries(requiredCodexSkills)) {
+    const relativePath = `.agents/skills/${name}/SKILL.md`
+    const absolutePath = path.join(projectRoot, relativePath)
+    addError(errors, fs.existsSync(absolutePath), `Missing Codex project skill: ${relativePath}`)
+    if (!fs.existsSync(absolutePath)) continue
+
+    const content = read(relativePath)
+    const frontmatter = content.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/)?.[1] ?? ""
+    const declaredName = frontmatter.match(/^name:\s*(.+)$/m)?.[1]?.trim()
+    const description = frontmatter.match(/^description:\s*(.+)$/m)?.[1]?.trim()
+
+    addError(errors, declaredName === name, `${relativePath}: frontmatter name must match its directory`)
+    addError(errors, Boolean(description) && description.length >= 40, `${relativePath}: missing or too-short discovery description`)
+    addError(errors, !content.includes(".claude/"), `${relativePath}: Codex skill must not depend on Claude adapters`)
+
+    for (const reference of [...sharedCodexSkillReferences, ...specificReferences]) {
+      addError(errors, fs.existsSync(path.join(projectRoot, reference)), `${relativePath}: referenced canonical file does not exist: ${reference}`)
+      addError(errors, content.includes(reference), `${relativePath}: missing canonical reference: ${reference}`)
+    }
+  }
+}
+
 function validateFeatureSpecs(errors, lifecycle) {
   const allowedTracks = new Set(lifecycle.implementation_tracks?.allowed ?? [])
   const featureDirectory = path.join(projectRoot, "features")
@@ -250,6 +313,7 @@ function validateLifecycle(lifecycle) {
       addError(errors, adapter.includes("AGENTS.md") && adapter.includes("agent-system/"), `Runtime adapter does not delegate to the canonical contract: ${relativePath}`)
     }
   }
+  validateCodexSkills(errors)
 
   const status = lifecycle.status_updates ?? {}
   addError(errors, status.file === "features/INDEX.md", "Status ownership must target features/INDEX.md")
